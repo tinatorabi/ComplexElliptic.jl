@@ -17,6 +17,6 @@ julia> ellipjc(3+4im, 2)
 The package can be installed as follows:
 
 ```jlcon
-julia> ] add https://github.com/tinatorabi/ComplexElliptic.jl
+julia> ] add ComplexElliptic
 
 ```
