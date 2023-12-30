@@ -2,12 +2,7 @@
 module ComplexElliptic
 
 """
-MATLAB Code:
-Author: Toby Driscoll
-Year: 1999
 
-
-Julia Rewrite:
 Author: Tina Torabi
 Year: 2023
 """
