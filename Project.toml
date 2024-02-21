@@ -1,7 +1,7 @@
 name = "ComplexElliptic"
 uuid = "fc032641-0a8e-429a-9c5f-63deb23bae7a"
 authors = ["Tina Torabi <tntorabii@gmail.com> and contributors"]
-version = "1.0.3"
+version = "1.0.2"
 
 [deps]
 Elliptic = "b305315f-e792-5b7a-8f41-49f472929428"
