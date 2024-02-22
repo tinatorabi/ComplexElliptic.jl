@@ -7,7 +7,7 @@ Year: 2023
 """
 
 
- function ellipkkpp(L)
+ function ellipkkp(L)
     if abs(L) > 10
         K = π / 2
         Kp = π * L + log(4)
