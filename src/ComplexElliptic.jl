@@ -1,4 +1,3 @@
-
 module ComplexElliptic
 
 """
@@ -6,9 +5,6 @@ module ComplexElliptic
 Author: Tina Torabi
 Year: 2023
 """
-
-
-using SpecialFunctions
 
 function ellipkkp(L)
     # Complete elliptic integral of the first kind, with complement.
