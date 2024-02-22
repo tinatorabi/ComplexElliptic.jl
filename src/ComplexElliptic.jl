@@ -73,7 +73,7 @@ end
 
 function ellipjc(u, L; flag=false)
 
-    if size(u) == 1
+    if length(u) == 1
         u = complex(u)
         if !flag
         L_= exp(-2 * π * L)
