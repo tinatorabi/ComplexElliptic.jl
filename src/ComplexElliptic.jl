@@ -72,46 +72,87 @@ end
 
 
 function ellipjc(u, L; flag=false)
-    u = complex(u)
-    if !flag
-        KK, Kp = ellipkkp(L)
-        high = imag.(u) .> real(Kp) / 2
-        u[high] = im * Kp .- u[high]
-        m = exp(-2 * pi * L)
-    else
-        high = falses(size(u))  
-        m = L
-    end
 
-    if abs(m) < 6eps(Float64)
-        sinu = sin.(u)
-        cosu = cos.(u)
-        sn = sinu + m / 4 * (sinu .* cosu - u) .* cosu
-        cn = cosu - m / 4 * (sinu .* cosu - u) .* sinu
-        dn = 1 .+ m / 4 .* (cosu .^ 2 - sinu .^ 2 .- 1)
-    else
-        if abs(m) > 1e-3
-            kappa = (1 - sqrt(Complex(1 - m))) / (1 + sqrt(Complex(1 - m)))
+    if size(u) == 1
+        u = complex(u)
+        if !flag
+        L_= exp(-2 * π * L)
+            K, Kp = ellipkkp(L_)[1], ellipkkp(1-L_)[1]
+            high = imag(u) > Kp / 2
+            if high
+                u = im * Kp - u
+            end
+            m = exp(-2 * pi * L)
         else
-            kappa = polyval(Complex{Float64}.([132.0, 42.0, 14.0, 5.0, 2.0, 1.0, 0.0]), Complex{Float64}(m / 4.0))
+            high = false
+            m = L
         end
-        mu = kappa ^ 2
-        v = u ./ (1 + kappa)
-        sn1, cn1, dn1 = ellipjc(v, mu, flag=true)
+    
+        if m < 6eps(Float64)
+            sinu = sin(u)
+            cosu = cos(u)
+            sn = sinu + m / 4 * (sinu .* cosu - u) .* cosu
+            cn = cosu - m / 4 * (sinu .* cosu - u) .* sinu
+            dn = 1 - m / 4 * (sinu .^ 2 - cosu .^ 2)
+        else
+            kappa = m > 1e-3 ? (1 - sqrt(1 - m)) / (1 + sqrt(1 - m)) : polyval([132.0, 42.0, 14.0, 5.0, 2.0, 1.0, 0.0], m / 4.0)
+            mu = kappa^2
+            v = u / (1 + kappa)
+            sn1, cn1, dn1 = ellipjc(v, mu, true)
+        
+            denom = 1 + kappa .* sn1 .^ 2
+            sn = (1 + kappa) .* sn1 ./ denom
+            cn = cn1 .* dn1 ./ denom
+            dn = (1 - kappa .* sn1 .^ 2) ./ denom
+        end
+    
+        if high
+            sn = -1 / (sqrt(m) * sn)
+            cn = im * dn / (sqrt(m) * sn)
+            dn = im * cn / sn
+        end
+    else
+        u = complex(u)
+        if !flag
+            KK, Kp = ellipkkp(L)
+            high = imag.(u) .> real(Kp) / 2
+            u[high] = im * Kp .- u[high]
+            m = exp(-2 * pi * L)
+        else
+            high = falses(size(u))  
+            m = L
+        end
+    
+        if abs(m) < 6eps(Float64)
+            sinu = sin.(u)
+            cosu = cos.(u)
+            sn = sinu + m / 4 * (sinu .* cosu - u) .* cosu
+            cn = cosu - m / 4 * (sinu .* cosu - u) .* sinu
+            dn = 1 .+ m / 4 .* (cosu .^ 2 - sinu .^ 2 .- 1)
+        else
+            if abs(m) > 1e-3
+                kappa = (1 - sqrt(Complex(1 - m))) / (1 + sqrt(Complex(1 - m)))
+            else
+                kappa = polyval(Complex{Float64}.([132.0, 42.0, 14.0, 5.0, 2.0, 1.0, 0.0]), Complex{Float64}(m / 4.0))
+            end
+            mu = kappa ^ 2
+            v = u ./ (1 + kappa)
+            sn1, cn1, dn1 = ellipjc(v, mu, flag=true)
 
-        denom = 1 .+ kappa .* sn1 .^ 2
-        sn = (1 .+ kappa) .* sn1 ./ denom
-        cn = cn1 .* dn1 ./ denom
-        dn = (1 .- kappa .* sn1 .^ 2) ./ denom
-    end
-
-    if any(high)
-        snh = sn[high]
-        cnh = cn[high]
-        dnh = dn[high]
-        sn[high] = -1 ./ (sqrt(m) * snh)
-        cn[high] = im * dnh ./ (sqrt(m) * snh)
-        dn[high] = im * cnh ./ snh
+            denom = 1 .+ kappa .* sn1 .^ 2
+            sn = (1 .+ kappa) .* sn1 ./ denom
+            cn = cn1 .* dn1 ./ denom
+            dn = (1 .- kappa .* sn1 .^ 2) ./ denom
+        end
+    
+        if any(high)
+            snh = sn[high]
+            cnh = cn[high]
+            dnh = dn[high]
+            sn[high] = -1 ./ (sqrt(m) * snh)
+            cn[high] = im * dnh ./ (sqrt(m) * snh)
+            dn[high] = im * cnh ./ snh
+        end
     end
 
     return sn, cn, dn
