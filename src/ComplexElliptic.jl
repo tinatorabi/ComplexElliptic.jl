@@ -83,7 +83,7 @@ function ellipjc(u, L, flag=false)
     u = complex(u)
     if !flag
 	L_= exp(-2 * π * L)
-        K, Kp = ellipke(L_)[1], ellipke(1-L_)[1]
+        K, Kp = ellipkkp(L_)[1], ellipkkp(1-L_)[1]
         high = imag(u) > Kp / 2
         if high
             u = im * Kp - u
