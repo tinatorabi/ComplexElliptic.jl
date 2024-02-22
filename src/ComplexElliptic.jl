@@ -5,62 +5,61 @@ module ComplexElliptic
 Author: Tina Torabi
 Year: 2023
 """
-function ellipkkp(L)
-    # Complete elliptic integral of the first kind, with complement.
-    if L > 10
+
+
+ function ellipkkpp(L)
+    if abs(L) > 10
         K = π / 2
         Kp = π * L + log(4)
         return K, Kp
     end
 
-    m = exp(-2 * π * L)
+    m = exp(-2 * π * L)  
     a0 = 1.0
     b0 = sqrt(1 - m)
+    a1=0
     s0 = m
     i1 = 0
     mm = 1.0
-    while mm > eps()
+    while abs(mm) > eps()
         a1 = (a0 + b0) / 2
         b1 = sqrt(a0 * b0)
         c1 = (a0 - b0) / 2
         i1 += 1
         w1 = 2^i1 * c1^2
-        mm = maximum([w1]) # Ensure w1 is in an array for maximum to work correctly
+        mm = w1[argmax(abs.(w1))]  
         s0 += w1
         a0 = a1
         b0 = b1
     end
-    K = π / (2 * a1)
+    K_ = π / (2 * a1)
 
-    if m == 1
-        K = Inf
-    end
-
-    # Recalculate for Kp using the complement
     a0 = 1.0
     b0 = sqrt(m)
     a1 = 0
     s0 = 1 - m
     i1 = 0
     mm = 1.0
-    while mm > eps()
+    while abs(mm) > eps()
         a1 = (a0 + b0) / 2
         b1 = sqrt(a0 * b0)
         c1 = (a0 - b0) / 2
         i1 += 1
         w1 = 2^i1 * c1^2
-        mm = maximum([w1]) # Ensure w1 is in an array for maximum to work correctly
+        mm = w1[argmax(abs.(w1))]  
         s0 += w1
         a0 = a1
         b0 = b1
     end
     Kp = π / (2 * a1)
+
     if m == 0
         Kp = Inf
     end
 
-    return K, Kp
+    return K_, Kp
 end
+
 
 
 function polyval(p::Vector{T}, x::T) where T <: Real
