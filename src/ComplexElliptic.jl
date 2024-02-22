@@ -5,7 +5,6 @@ module ComplexElliptic
 Author: Tina Torabi
 Year: 2023
 """
-
 function ellipkkp(L)
     # Complete elliptic integral of the first kind, with complement.
     if L > 10
@@ -26,7 +25,7 @@ function ellipkkp(L)
         c1 = (a0 - b0) / 2
         i1 += 1
         w1 = 2^i1 * c1^2
-        mm = maximum(w1)
+        mm = maximum([w1]) # Ensure w1 is in an array for maximum to work correctly
         s0 += w1
         a0 = a1
         b0 = b1
@@ -37,30 +36,27 @@ function ellipkkp(L)
         K = Inf
     end
 
-    if nargout() > 1
-        a0 = 1.0
-        b0 = sqrt(m)
-        a1=0
-        s0 = 1 - m
-        i1 = 0
-        mm = 1.0
-        while mm > eps()
-            a1 = (a0 + b0) / 2
-            b1 = sqrt(a0 * b0)
-            c1 = (a0 - b0) / 2
-            i1 += 1
-            w1 = 2^i1 * c1^2
-            mm = maximum(w1)
-            s0 += w1
-            a0 = a1
-            b0 = b1
-        end
-        Kp = π / (2 * a1)
-        if m == 0
-            Kp = Inf
-        end
-    else
-        Kp = nothing
+    # Recalculate for Kp using the complement
+    a0 = 1.0
+    b0 = sqrt(m)
+    a1 = 0
+    s0 = 1 - m
+    i1 = 0
+    mm = 1.0
+    while mm > eps()
+        a1 = (a0 + b0) / 2
+        b1 = sqrt(a0 * b0)
+        c1 = (a0 - b0) / 2
+        i1 += 1
+        w1 = 2^i1 * c1^2
+        mm = maximum([w1]) # Ensure w1 is in an array for maximum to work correctly
+        s0 += w1
+        a0 = a1
+        b0 = b1
+    end
+    Kp = π / (2 * a1)
+    if m == 0
+        Kp = Inf
     end
 
     return K, Kp
