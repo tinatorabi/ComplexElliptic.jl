@@ -20,3 +20,4 @@ The package can be installed as follows:
 julia> ] add ComplexElliptic
 
 ```
+[![DOI](https://zenodo.org/badge/721857483.svg)](https://zenodo.org/doi/10.5281/zenodo.12622676)
