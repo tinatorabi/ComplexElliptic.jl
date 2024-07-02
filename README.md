@@ -8,8 +8,7 @@ The algorithm is the descending Landen transformation, which is explained in det
 A similar algorithm was implemented in MATLAB by Toby Driscoll. 
 
 ```jlcon
-julia> import ComplexElliptic.ellipjc
-
+julia> using ComplexElliptic
 julia> ellipjc(3+4im, 2)
 (3.8611134365506516 - 27.032884005488256im, -19.4248392253911 + 2.7781705335555387im, 0.689812164575172 - 0.20129607887149814im)
 ```
