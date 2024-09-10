@@ -21,51 +21,48 @@ u = 1.0 + 0.5im
 sn, cn, dn = ellipjc(u, L)
 """
 function ellipjc(u, L; flag=false)
-    u = u isa Array ? u : [u]
-    sn = similar(u, Complex{Float64})
-    cn = similar(u, Complex{Float64})
-    dn = similar(u, Complex{Float64})
-    
     if !flag
-        KK, Kp = ellipkkp(L)
-        high = imag.(u) .> real(Kp) / 2
-        u[high] = im * Kp .- u[high]
+        _, Kp = ellipkkp(L)
+        high = [(imag(x) > real(Kp) / 2) for x in u]
+        if any(high)
+            u = [(imag(x) > real(Kp) / 2) ? im * Kp .- x : x for x in u]
+        end
         m = exp(-2 * pi * L)
     else
-        high = falses(size(u))
+        high = falses(size(u))  
         m = L
     end
-
     if abs(m) < 6eps(Float64)
-        sinu = sin.(u)
-        cosu = cos.(u)
-        sn .= sinu + m / 4 * (sinu .* cosu - u) .* cosu
-        cn .= cosu - m / 4 * (sinu .* cosu - u) .* sinu
-        dn .= 1 .+ m / 4 .* (cosu .^ 2 - sinu .^ 2 .- 1)
+        sinu = [sin(x) for x in u]
+        cosu = [cos(x) for x in u]
+        sn = sinu + m / 4 * (sinu .* cosu - u) .* cosu
+        cn = cosu - m / 4 * (sinu .* cosu - u) .* sinu
+        dn = 1 .+ m / 4 .* (cosu .^ 2 - sinu .^ 2 .- 1)
     else
         if abs(m) > 1e-3
             kappa = (1 - sqrt(Complex(1 - m))) / (1 + sqrt(Complex(1 - m)))
         else
-            kappa = polyval(Complex{Float64}.([132.0, 42.0, 14.0, 5.0, 2.0, 1.0, 0.0]), Complex{Float64}(m / 4.0))
+            kappa = ComplexElliptic.polyval(Complex{Float64}.([132.0, 42.0, 14.0, 5.0, 2.0, 1.0, 0.0]), Complex{Float64}(m / 4.0))
         end
-        mu = kappa ^ 2
-        v = u ./ (1 + kappa)
-        sn1, cn1, dn1 = ellipjc(v, mu, flag=true)
+        sn1, cn1, dn1 = Zygcompat_ellipjc(u / (1 + kappa), kappa ^ 2, flag=true)
 
         denom = 1 .+ kappa .* sn1 .^ 2
-        sn .= (1 .+ kappa) .* sn1 ./ denom
-        cn .= cn1 .* dn1 ./ denom
-        dn .= (1 .- kappa .* sn1 .^ 2) ./ denom
+        sn = (1 .+ kappa) .* sn1 ./ denom
+        cn = cn1 .* dn1 ./ denom
+        dn = (1 .- kappa .* sn1 .^ 2) ./ denom
     end
 
     if any(high)
-        snh = sn[high]
-        cnh = cn[high]
-        dnh = dn[high]
-        sn[high] .= -1 ./ (sqrt(m) * snh)
-        cn[high] .= im * dnh ./ (sqrt(m) * snh)
-        dn[high] .= im * cnh ./ snh
+        snh = Zygote.Buffer(sn)
+        cnh = Zygote.Buffer(cn)
+        dnh = Zygote.Buffer(dn)
+        snh[:] = sn[:]
+        cnh[:] = cn[:]
+        dnh[:] = dn[:]
+        snh[high] = -1 ./ (sqrt(m) * sn[high])
+        cnh[high] = im * dn[high] ./ (sqrt(m) * sn[high])
+        dnh[high] = im * cn[high] ./ sn[high]
     end
 
-    return sn, cn, dn
+    return copy(sn), copy(cn), copy(dn)
 end
