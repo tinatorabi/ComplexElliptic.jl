@@ -44,7 +44,7 @@ function ellipjc(u, L; flag=false)
         else
             kappa = ComplexElliptic.polyval(Complex{Float64}.([132.0, 42.0, 14.0, 5.0, 2.0, 1.0, 0.0]), Complex{Float64}(m / 4.0))
         end
-        sn1, cn1, dn1 = Zygcompat_ellipjc(u / (1 + kappa), kappa ^ 2, flag=true)
+        sn1, cn1, dn1 = ellipjc(u / (1 + kappa), kappa ^ 2, flag=true)
 
         denom = 1 .+ kappa .* sn1 .^ 2
         sn = (1 .+ kappa) .* sn1 ./ denom
